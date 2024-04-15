@@ -60,7 +60,7 @@ for year in years:
 a = df_all.query("category == 'DL'")
 
 #print this dataframe to csv file 
-a.to_csv('C:/kaggle/working/dataframe_before.csv',index=False,header=True)
+#a.to_csv('C:/kaggle/working/dataframe_before.csv',index=False,header=True)
 
 #from the dataframe select all draft picks that ended up starting atleast 2 games
 sorted_df = a.loc[(a['seasons_started'] > 2)]
@@ -138,10 +138,10 @@ plt.ylabel("Seasons Started", fontdict={'fontsize':21});
 
 
 #print updated logo dataframe to csv 
-sorted_df2.to_csv('C:/kaggle/working/NFLDraftHistory1.csv',index=False,header=True)
+#sorted_df2.to_csv('C:/kaggle/working/NFLDraftHistory1.csv',index=False,header=True)
 
 #print updated draft dataframe to csv 
-draft_info.to_csv('C:/kaggle/working/draft_info.csv',index=False,header=True)
+#draft_info.to_csv('C:/kaggle/working/draft_info.csv',index=False,header=True)
 
 #print(sorted_df)
 #sorted_df.plot(x="pick", y=["pfr_player_name", "probowls" ],
