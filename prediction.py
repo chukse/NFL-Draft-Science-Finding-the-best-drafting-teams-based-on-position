@@ -11,22 +11,30 @@ from datetime import date
 import matplotlib.pyplot as plt
 from matplotlib.offsetbox import OffsetImage, AnnotationBbox
 
-
+#Formatting Dataframes
 pd.options.display.float_format = "{:,.2f}".format
 pd.set_option('display.precision', 2)
 
+#Years we will evaluating NFL Draft Picks 
 years = range(2000,2023)
+
+#initiate dataframe
 df_all = pd.DataFrame()
 df_pbp_all = pd.DataFrame()
+
+#pull team logos from library
 logo = nfl.import_team_desc()
 logo = logo[['team_abbr', 'team_logo_espn']]
+
+#initiate logos list and paths of logos 
 logo_paths = []
 team_abbr = []
 
-
+#if not already there, make a 'logos' folder to store logos
 if not os.path.exists("logos"):
     os.makedirs("logos")
 
+#loop that pulls all logos and paths and stores them in respective list 
 for team in range(len(logo)):
     urllib.request.urlretrieve(logo['team_logo_espn'][team], f"logos/{logo['team_abbr'][team]}.tif")
     logo_paths.append(f"logos/{logo['team_abbr'][team]}.tif")
@@ -34,46 +42,36 @@ for team in range(len(logo)):
 
 
     
-# Create a dictionary to put logo_paths and team_abbr in
+# Create a dictionary to put logo_paths and team_abbr lists 
 data = {'Team Abbr' : team_abbr, 'Logo Path' : logo_paths}
 
 # Create a DataFrame from the dictionary
 logo_df = pd.DataFrame(data)
 
-logo_df.head()
 
-
-logo_df = pd.DataFrame(data)
-
-logo_df.head()
-
-
+#loop to pull all draft picks from years range and merge into one dataframe 
 for year in years:
     df_draft = nfl.import_draft_picks([year])
     #df_pbp = nfl.import_pbp_data([year])
     
     df_all = pd.concat([df_all,df_draft], ignore_index=True)
-    #df_pbp_all = pd.concat([df_pbp_all,df_pbp], ignore_index=True)
-    #print(df_all)
 
-a = df_all.query("category == 'DB'")
-#a = pd.concat([df_all.query("position == 'CB'"), df_all.query("position == 'S'")])
+#only select all draft picks that were categroized as "DL"
+a = df_all.query("category == 'DL'")
+
+#print this dataframe to csv file 
 a.to_csv('C:/kaggle/working/dataframe_before.csv',index=False,header=True)
-#df_value = nfl.import_draft_values()
-#df_all.query("position == 'QB'").to_csv('C:/kaggle/working/NFLDraftHistory.csv',index=False,header=True)
 
-#a.sort_values("pass_yards",ascending=False)
-
+#from the dataframe select all draft picks that ended up starting atleast 2 games
 sorted_df = a.loc[(a['seasons_started'] > 2)]
 
 
-#sorted_df.rename(columns = {'team':'Team Abbr'}, inplace = True)
 
+#rename "team" column in dataframe in prep for merging dataframes
 sorted_df2 = sorted_df.rename(columns={'team':'Team Abbr'})
 print(type(sorted_df2))
 
-#print(len(sorted_df2['Team Abbr']))
-
+#change teem abbr in the logo dataframe, to latest teams 
 for i in range(len(sorted_df2['Team Abbr'])):
     if(sorted_df2['Team Abbr'].iloc[i] == 'GNB'):
         sorted_df2['Team Abbr'] = sorted_df2['Team Abbr'].replace(['GNB'], 'GB')
@@ -95,15 +93,18 @@ for i in range(len(sorted_df2['Team Abbr'])):
 
 
 
-
+#combines logo dataframe and draft picks dataframes 
 draft_info = pd.merge(sorted_df2, logo_df, on='Team Abbr')
 
+#stores paths in list 
 paths = draft_info['Logo Path']
 #print(draft_info)
-#draft_info = draft_info.groupby("pick").sum().reset_index()
+
+#if same pick, group them together to get the best picks to draft a particular position
+draft_info = draft_info.groupby("pick").sum().reset_index()
 
 
-
+#function to pass image path and create plot images
 def getImage(path):
     return OffsetImage(plt.imread(path, format="tif"), zoom=.07)
 
@@ -117,7 +118,7 @@ plt.rcParams["figure.autolayout"] = True
 x = draft_info['pick']
 y = draft_info['seasons_started']
 
-# Define the image paths
+
 
 
 # Define the plot
@@ -125,7 +126,6 @@ fig, ax = plt.subplots()
 fig.subplots_adjust( left=None, bottom=None,  right=None, top=None, wspace=None, hspace=None)
 # Load the data into the plot
 for x0, y0, path in zip(x, y, paths):
-   #print(getImage(path))
    ab = AnnotationBbox(getImage(path), (x0, y0), frameon=False)
    ax.add_artist(ab)
 
@@ -137,10 +137,10 @@ plt.xlabel("pick", fontdict={'fontsize':21});
 plt.ylabel("Seasons Started", fontdict={'fontsize':21});
 
 
-
+#print updated logo dataframe to csv 
 sorted_df2.to_csv('C:/kaggle/working/NFLDraftHistory1.csv',index=False,header=True)
-#df_value.to_csv('C:/kaggle/working/NFLDraftvalue.csv',index=False,header=True)
-#df_pbp_all.to_csv('C:/kaggle/working/playbyplay.csv',index=False,header=True)
+
+#print updated draft dataframe to csv 
 draft_info.to_csv('C:/kaggle/working/draft_info.csv',index=False,header=True)
 
 #print(sorted_df)
