@@ -57,13 +57,13 @@ for year in years:
     df_all = pd.concat([df_all,df_draft], ignore_index=True)
 
 #only select all draft picks that were categroized as "DL"
-a = df_all.query("category == 'DL'")
+a = df_all.query("category == 'WR'")
 
 #print this dataframe to csv file 
 #a.to_csv('C:/kaggle/working/dataframe_before.csv',index=False,header=True)
 
 #from the dataframe select all draft picks that ended up starting atleast 2 games
-sorted_df = a.loc[(a['seasons_started'] > 2)]
+sorted_df = a.loc[(a['seasons_started'] = > 2)]
 
 
 
@@ -106,7 +106,7 @@ draft_info = draft_info.groupby("pick").sum().reset_index()
 
 #function to pass image path and create plot images
 def getImage(path):
-    return OffsetImage(plt.imread(path, format="tif"), zoom=.07)
+    return OffsetImage(plt.imread(path, format="tif"), zoom=.03)
 
 
 
